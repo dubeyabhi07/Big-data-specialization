@@ -1,3 +1,5 @@
+package stocks
+
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.rdd.RDD
@@ -35,73 +37,67 @@ object StockAnalysis {
 
   def main(args: Array[String]): Unit = {
 
-    val sparkSess = SparkSession.builder()
-      .appName("twitter-trending-hashtags")
-      .master("local")
-      .getOrCreate()
-    val sc = sparkSess.sparkContext
-    sc.setLogLevel("ERROR")
-    val sqlContext = new SQLContext(sc)
+    val(sparkSession,sparkContext,sqlContext) = Utility.startSparkSession;
     import sqlContext.implicits._
 
     //HDFC bank
-    val HDFC = parseRDD(sc.textFile("resources/stocks/HDFCBANK.NS.csv"), "HDFC").toDF.na.drop()
+    val HDFC = parseRDD(sparkContext.textFile("resources/stocks/HDFCBANK.NS.csv"), "HDFC").toDF.na.drop()
     HDFC.createTempView("HDFCView")
 
     //ICICI bank
-    val ICICI = parseRDD(sc.textFile("resources/stocks/ICICIBANK.NS.csv"), "ICICI").toDF.na.drop()
+    val ICICI = parseRDD(sparkContext.textFile("resources/stocks/ICICIBANK.NS.csv"), "ICICI").toDF.na.drop()
     ICICI.createTempView("ICICIView")
 
     //Cipla
-    val cipla = parseRDD(sc.textFile("resources/stocks/CIPLA.NS.csv"), "cipla").toDF.na.drop()
+    val cipla = parseRDD(sparkContext.textFile("resources/stocks/CIPLA.NS.csv"), "cipla").toDF.na.drop()
     cipla.createTempView("ciplaView")
 
     //Hindustan Uniliver
-    val HUL = parseRDD(sc.textFile("resources/stocks/HINDUNILVR.NS.csv"), "HUL").toDF.na.drop()
+    val HUL = parseRDD(sparkContext.textFile("resources/stocks/HINDUNILVR.NS.csv"), "HUL").toDF.na.drop()
     HUL.createTempView("HULView")
 
     //Sunpharma
-    val sunpharma = parseRDD(sc.textFile("resources/stocks/Sunpharma.NS.csv"), "sunpharma").toDF.na.drop()
+    val sunpharma = parseRDD(sparkContext.textFile("resources/stocks/Sunpharma.NS.csv"), "sunpharma").toDF.na.drop()
     sunpharma.createTempView("sunpharmaView")
 
     //DLF bank
-    val DLF = parseRDD(sc.textFile("resources/stocks/DLF.NS.csv"), "DLF").toDF.na.drop()
+    val DLF = parseRDD(sparkContext.textFile("resources/stocks/DLF.NS.csv"), "DLF").toDF.na.drop()
     DLF.createTempView("DLFView")
 
     //India bulls real-estate
-    val indiaBulls = parseRDD(sc.textFile("resources/stocks/IBREALEST.NS.csv"), "indiaBulls").toDF.na.drop()
+    val indiaBulls = parseRDD(sparkContext.textFile("resources/stocks/IBREALEST.NS.csv"), "indiaBulls").toDF.na.drop()
     indiaBulls.createTempView("indiaBullsView")
 
     //Reliance
-    val reliance = parseRDD(sc.textFile("resources/stocks/RELIANCE.NS.csv"), "reliance").toDF.na.drop()
+    val reliance = parseRDD(sparkContext.textFile("resources/stocks/RELIANCE.NS.csv"), "reliance").toDF.na.drop()
     reliance.createTempView("relianceView")
 
     //ONGC
-    val ONGC = parseRDD(sc.textFile("resources/stocks/ONGC.NS.csv"), "ONGC").toDF.na.drop()
+    val ONGC = parseRDD(sparkContext.textFile("resources/stocks/ONGC.NS.csv"), "ONGC").toDF.na.drop()
     ONGC.createTempView("ONGCView")
 
     //TATA motors
-    val tataMotors = parseRDD(sc.textFile("resources/stocks/TATAMOTORS.NS.csv"), "tataMotors").toDF.na.drop()
+    val tataMotors = parseRDD(sparkContext.textFile("resources/stocks/TATAMOTORS.NS.csv"), "tataMotors").toDF.na.drop()
     tataMotors.createTempView("tataMotorsView")
 
     //Hero motocorp
-    val hero = parseRDD(sc.textFile("resources/stocks/HEROMOTOCO.NS.csv"), "hero").toDF.na.drop()
+    val hero = parseRDD(sparkContext.textFile("resources/stocks/HEROMOTOCO.NS.csv"), "hero").toDF.na.drop()
     hero.createTempView("heroView")
 
     //Symphony
-    val symphony = parseRDD(sc.textFile("resources/stocks/SYMPHONY.NS.csv"), "symphony").toDF.na.drop()
+    val symphony = parseRDD(sparkContext.textFile("resources/stocks/SYMPHONY.NS.csv"), "symphony").toDF.na.drop()
     symphony.createTempView("symphonyView")
 
     //Whirlpool
-    val whirlpool = parseRDD(sc.textFile("resources/stocks/WHIRLPOOL.NS.csv"), "whirlpool").toDF.na.drop()
+    val whirlpool = parseRDD(sparkContext.textFile("resources/stocks/WHIRLPOOL.NS.csv"), "whirlpool").toDF.na.drop()
     whirlpool.createTempView("whirlpoolView")
 
     //Donear
-    val donear = parseRDD(sc.textFile("resources/stocks/DONEAR.NS.csv"), "donear").toDF.na.drop()
+    val donear = parseRDD(sparkContext.textFile("resources/stocks/DONEAR.NS.csv"), "donear").toDF.na.drop()
     donear.createTempView("donearView")
 
     //Raymond
-    val raymond = parseRDD(sc.textFile("resources/stocks/RAYMOND.NS.csv"), "raymond").toDF.na.drop()
+    val raymond = parseRDD(sparkContext.textFile("resources/stocks/RAYMOND.NS.csv"), "raymond").toDF.na.drop()
     raymond.createTempView("raymondView")
 
     //##################################### Basic queries ###################################################
