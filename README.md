@@ -1,2 +1,2 @@
-# Big-data-specialization
-Assignments of courses from University-of-California-San-Diego-Big-Data-Specialization
+# Data-analysis-with-apache-spark
+Hands on experience working with sparkSQL, spark-Streaming & spark-graphX in Scala  
