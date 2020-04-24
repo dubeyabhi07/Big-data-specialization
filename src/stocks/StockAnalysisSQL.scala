@@ -78,10 +78,10 @@ object StockAnalysisSQL {
         if (stock != stocks(0)) {
           query += "UNION";
         }
-        var subQuery = "SELECT stock, SUM(price) AS profit " +
-          " FROM ( SELECT stockName AS stock, closePrice as price FROM " + stock + "View WHERE dt = '2019-12-31'" +
+        var subQuery = "SELECT stock, SUM(price) AS profit, SUM(basePrice) AS basePrice " +
+          " FROM ( SELECT stockName AS stock, closePrice as price, 0 as basePrice FROM " + stock + "View WHERE dt = '2019-12-31'" +
           " UNION" +
-          " SELECT stockName AS stock, openPrice*-1 as price FROM " + stock + "View WHERE dt = '2019-01-01' )" +
+          " SELECT stockName AS stock, openPrice*-1 as price, openPrice as basePrice  FROM " + stock + "View WHERE dt = '2019-01-01' )" +
           " GROUP BY stock";
         println(subQuery);
         query += "( " + subQuery + " )";
@@ -103,27 +103,17 @@ object StockAnalysisSQL {
 
     profits.createTempView("profits");
 
-    def createQueryforMaxPercentageProfit(stocks: Array[String]): String = {
+    def createQueryforMaxPercentageProfit(): String = {
       var query: String = "";
-      for (stock <- stocks) {
-        if (stock != stocks(0)) {
-          query += "UNION";
-        }
-        var subQuery = " SELECT stockName AS stock, openPrice FROM " + stock + "View WHERE dt = '2019-01-01'"
-        println(subQuery);
-        query += "( " + subQuery + " )";
-      }
 
-      query = "SELECT profits.stock, profits.profit, data.openPrice," +
-        " (100*(profits.profit / data.openPrice)) AS profitPercent FROM (" + query + ") AS data" +
-        " JOIN profits ON data.stock = profits.stock ";
-
+      query = "SELECT profits.stock, profits.profit, profits.basePrice," +
+        " (100*(profits.profit / profits.basePrice)) AS profitPercent FROM profits "
       query += "ORDER BY profitPercent DESC"
 
       return query;
     }
 
-    var profitPercentage = sqlContext.sql(createQueryforMaxPercentageProfit(stocksToBeLoaded));
+    var profitPercentage = sqlContext.sql(createQueryforMaxPercentageProfit());
     println("The % profit earned per unit stock in 2019 is in order : ");
     profitPercentage.show
   }
