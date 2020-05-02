@@ -9,14 +9,15 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.DataFrame
 
 case class Stock(
-  stockName:     String,
-  dt:            String,
-  openPrice:     Double,
-  highPrice:     Double,
-  lowPrice:      Double,
-  closePrice:    Double,
-  adjClosePrice: Double,
-  volume:        Double)
+                  stockName: String,
+                  dt: String,
+                  openPrice: Double,
+                  highPrice: Double,
+                  lowPrice: Double,
+                  closePrice: Double,
+                  adjClosePrice: Double,
+                  volume: Double
+                )
 
 class Utility {
 
@@ -41,7 +42,9 @@ object Utility {
 
   def parseRDD(rdd: RDD[String], stockName: String): RDD[Stock] = {
     val header = rdd.first
-    rdd.filter((data) => { data(0) != header(0) && !data.contains("null") })
+    rdd.filter((data) => {
+      data(0) != header(0) && !data.contains("null")
+    })
       .map(data => parseStock(data, stockName))
   }
 
@@ -56,18 +59,18 @@ object Utility {
     (sparkSession, sqlContext)
   }
 
-  def getStocksDataFrames(sparkSession: SparkSession, sqlContext: SQLContext,stocksToBeLoaded : Array[String]): Map[String, DataFrame] = {
+  def getStocksDataFrames(sparkSession: SparkSession, sqlContext: SQLContext, stocksToBeLoaded: Array[String]): Map[String, DataFrame] = {
     import sqlContext.implicits._
     var dataFrameMap: Map[String, DataFrame] = Map()
     for (stock <- stocksToBeLoaded) {
       dataFrameMap += (stock ->
         parseRDD(sparkSession.sparkContext.textFile(props.getString(stock)), stock).toDF.na.drop())
-    } 
+    }
     dataFrameMap;
   }
-  
-  def createStocksTempViews(dataFrameMap : Map[String, DataFrame]) ={
-    dataFrameMap.foreach(pair=>pair._2.createTempView(pair._1+"View"))
+
+  def createStocksTempViews(dataFrameMap: Map[String, DataFrame]) = {
+    dataFrameMap.foreach(pair => pair._2.createTempView(pair._1 + "View"))
   }
 }
 

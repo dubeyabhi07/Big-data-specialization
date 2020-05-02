@@ -1,9 +1,6 @@
-.project
-.classpath
-.cache-tests
-.cache-main
+/project/target/
+/project/project/
 /target/
-.settings
 .idea/
-
 /src/main/resources/NOAA/
+/lib/

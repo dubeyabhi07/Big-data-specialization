@@ -15,7 +15,7 @@ object StockAnalysisDF {
      *  assuming it was bought on first day of that month and sold on last day of that month in 2019.
      *
      * */
-    
+
     var derivedMap: Map[String, DataFrame] = dataFrameMap.mapValues((df) =>
       df.withColumn("month", col("dt").substr(6, 2))
         //if this orderBy is added to windowSpec then columns with agg will have cumulative results
@@ -47,16 +47,16 @@ object StockAnalysisDF {
      *  assuming it was bought on first day of that month and sold on last day of that month in 2019.
      *
      * */
-    
+
     var result2 = result1._2
-    //groupBy operation here makes it difficult to retrieve the name of stock
-    .withColumn("row", row_number.over(windowSpecMonth.orderBy(col("maxProfitPercent").desc)))
-    .where(col("row")===1)
-    .drop(col("row"))
-    .orderBy(col("month"))
-    
+      //groupBy operation here makes it difficult to retrieve the name of stock
+      .withColumn("row", row_number.over(windowSpecMonth.orderBy(col("maxProfitPercent").desc)))
+      .where(col("row") === 1)
+      .drop(col("row"))
+      .orderBy(col("month"))
+
     result2.show()
-     
+
 
   }
 }
