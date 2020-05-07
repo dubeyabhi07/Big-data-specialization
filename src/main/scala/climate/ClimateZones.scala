@@ -1,0 +1,5 @@
+package climate
+
+object ClimateZones {
+
+}
