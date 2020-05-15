@@ -11,5 +11,8 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.4.0",
   "org.scalafx" %% "scalafx" % "12.0.2-R18",
   "org.apache.spark" %% "spark-streaming" % "2.4.3" % "provided",
-  "org.apache.bahir" %% "spark-streaming-twitter" % "2.4.0"
+  "org.apache.bahir" %% "spark-streaming-twitter" % "2.4.0",
+  "edu.stanford.nlp" % "stanford-corenlp" % "3.5.1",
+  "edu.stanford.nlp" % "stanford-corenlp" % "3.5.1" classifier "models"
 )
+

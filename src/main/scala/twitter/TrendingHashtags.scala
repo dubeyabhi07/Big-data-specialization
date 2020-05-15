@@ -5,7 +5,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.twitter.TwitterUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-object TwitterTrendingHashtags {
+object TrendingHashtags {
 
   def main(args: Array[String]): Unit = {
 
@@ -57,5 +57,4 @@ object TwitterTrendingHashtags {
     streamingContext.awaitTermination();
 
   }
-
 }
