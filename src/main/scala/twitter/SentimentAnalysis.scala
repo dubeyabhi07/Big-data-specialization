@@ -1,5 +1,6 @@
 package twitter
 
+import sessioninit.Session
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.Seconds
@@ -27,14 +28,9 @@ object SentimentAnalysis {
     System.setProperty("twitter4j.oauth.accessToken", props.getString("twitter4j.oauth.accessToken"))
     System.setProperty("twitter4j.oauth.accessTokenSecret", props.getString("twitter4j.oauth.accessTokenSecret"))
 
-    val sparkSess = SparkSession.builder()
-      .appName("twitter-sentiment-analysis")
-      .master("local[2]")
-      .getOrCreate()
+    val sparkSess = Session.startSparkSession
     val sc = sparkSess.sparkContext
     val streamingContext = new StreamingContext(sc, Seconds(5))
-    val sparkContext = sparkSess.sparkContext
-    sparkContext.setLogLevel("ERROR")
 
     val tweets = TwitterUtils.createStream(streamingContext, None, Array("India"))
     tweets.map(status => status.getText).map(tweet => (tweet, sentiment(tweet)))

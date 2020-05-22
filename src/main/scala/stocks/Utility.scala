@@ -48,19 +48,8 @@ object Utility {
       .map(data => parseStock(data, stockName))
   }
 
-  def startSparkSession = {
-    val sparkSession = SparkSession.builder()
-      .appName("twitter-trending-hashtags")
-      .master("local")
-      .getOrCreate()
-    val sparkContext = sparkSession.sparkContext
-    sparkContext.setLogLevel("ERROR")
-    val sqlContext = new SQLContext(sparkContext)
-    (sparkSession, sqlContext)
-  }
-
-  def getStocksDataFrames(sparkSession: SparkSession, sqlContext: SQLContext, stocksToBeLoaded: Array[String]): Map[String, DataFrame] = {
-    import sqlContext.implicits._
+  def getStocksDataFrames(sparkSession: SparkSession, stocksToBeLoaded: Array[String]): Map[String, DataFrame] = {
+    import sparkSession.sqlContext.implicits._
     var dataFrameMap: Map[String, DataFrame] = Map()
     for (stock <- stocksToBeLoaded) {
       dataFrameMap += (stock ->

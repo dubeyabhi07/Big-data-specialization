@@ -4,6 +4,7 @@ Hands on experience working with sparkSQL, spark-Streaming & spark-graphX in Sca
 ### NOAA (National Oceanic and Atmospheric Administration) data source :
 - Download <year>.csv from ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/  and save it under src/main/resources/NOAA/<year>.csv
 - Download gscnd-stations.txt from ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/ and save it under src/main/resources/NOAA/ghcnd-stations.csv
+- Update the climateData property accordingly in application.properties
 
 ### NSE (National Stock Exchange) data :
 - It is small and is uploaded in this repo.

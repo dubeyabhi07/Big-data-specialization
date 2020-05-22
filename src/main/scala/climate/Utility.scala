@@ -1,5 +1,6 @@
 package climate
 
+import com.typesafe.config.ConfigFactory
 import org.apache.spark.ml.clustering.KMeans
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.sql.{DataFrame, Encoders, SQLContext, SparkSession}
@@ -20,22 +21,11 @@ case class NOAAData(
                    )
 
 object Utility {
-
-
-  def startSparkSession = {
-    val sparkSession = SparkSession.builder()
-      .appName("twitter-trending-hashtags")
-      .master("local")
-      .getOrCreate()
-    val sparkContext = sparkSession.sparkContext
-    sparkContext.setLogLevel("ERROR")
-    val sqlContext = new SQLContext(sparkContext)
-    (sparkSession, sqlContext)
-  }
+  val props = ConfigFactory.load("application.properties");
 
   def createStationClusterByLatLong(sparkSession: SparkSession): DataFrame = {
     import sparkSession.implicits._
-    val stations = sparkSession.read.textFile("src/main/resources/NOAA/ghcnd-stations.txt")
+    val stations = sparkSession.read.textFile(props.getString("stationData"))
       .map(line => {
         val id = line.substring(0, 11)
         val lat = line.substring(12, 20).trim.toDouble
@@ -68,7 +58,7 @@ object Utility {
 
   def returnNOAAObservatoryData(sparkSession: SparkSession, fraction: Int): DataFrame = {
     val observationData = sparkSession.read.schema(Encoders.product[NOAAData].schema).
-      option("dateFormat", "yyyyMMdd").csv("src/main/resources/NOAA/1900.csv")
+      option("dateFormat", "yyyyMMdd").csv(props.getString("climateData"))
 
     println("NOAA Observatory Data :")
     println("Datasize is : "+observationData.count())

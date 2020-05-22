@@ -37,7 +37,7 @@ object StockAnalysisDF {
           sum("referencePrice").as("referencePrice"))
         .select(col("month"), col("stock"), col("referenceprice").as("baseOpeningPrice"), col("maxProfitPerUnit"),
           ((col("maxProfitPerUnit") * 100) / col("referencePrice")).as("maxProfitPercent")))
-
+    println("Most profitable stock-month combination stock in 2019 (descending order) : ")
     var result1 = derivedMap.reduce((v1, v2) => (v1._1, v1._2.union(v2._2)))
     result1._2.orderBy(col("maxProfitPercent").desc).show(100)
 
@@ -54,7 +54,7 @@ object StockAnalysisDF {
       .where(col("row") === 1)
       .drop(col("row"))
       .orderBy(col("month"))
-
+    println("Most profitable stock for each month in 2019 : ")
     result2.show()
 
 

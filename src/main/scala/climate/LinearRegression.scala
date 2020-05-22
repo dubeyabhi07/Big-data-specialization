@@ -1,5 +1,6 @@
 package climate
 
+import sessioninit.Session
 import org.apache.spark.ml.clustering.KMeans
 import org.apache.spark.ml.feature.VectorAssembler
 import org.apache.spark.ml.regression.LinearRegression
@@ -12,9 +13,9 @@ import scala.util.Random
 
 object LinearRegression extends App {
 
-  val (sparkSession, sqlContext) = Utility.startSparkSession;
+  val sparkSession = Session.startSparkSession;
 
-  import sqlContext.implicits._
+  import sparkSession.sqlContext.implicits._
 
   val stationClustersByLatLon = Utility.createStationClusterByLatLong(sparkSession)
   val observedData = Utility.returnNOAAObservatoryData(sparkSession, 500)

@@ -1,9 +1,9 @@
 package twitter
 
 import com.typesafe.config.ConfigFactory
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.twitter.TwitterUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
+import sessioninit.Session
 
 object TrendingHashtags {
 
@@ -15,14 +15,9 @@ object TrendingHashtags {
     System.setProperty("twitter4j.oauth.accessToken", props.getString("twitter4j.oauth.accessToken"))
     System.setProperty("twitter4j.oauth.accessTokenSecret", props.getString("twitter4j.oauth.accessTokenSecret"))
 
-    val sparkSess = SparkSession.builder()
-      .appName("twitter-trending-hashtags")
-      .master("local[2]")
-      .getOrCreate()
+    val sparkSess = Session.startSparkSession
     val sc = sparkSess.sparkContext
     val streamingContext = new StreamingContext(sc, Seconds(5))
-    val sparkContext = sparkSess.sparkContext
-    sparkContext.setLogLevel("ERROR")
 
     val stream = TwitterUtils.createStream(streamingContext, None)
 
