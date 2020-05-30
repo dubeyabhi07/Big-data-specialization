@@ -1,5 +1,6 @@
 package event
 
+import climate.Utility.props
 import com.typesafe.config.ConfigFactory
 import sessioninit.Session
 import org.apache.spark.sql.functions._
@@ -7,6 +8,12 @@ import org.apache.spark.sql.expressions._
 import org.apache.spark.sql.functions.{col, explode, lit, map, map_concat, map_from_entries, map_keys, map_values}
 import org.apache.spark.sql.types.{ArrayType, IntegerType, MapType, StringType, StructType}
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+
+//creating a case class as StructType can't be passed in UDF
+case class scheduleDetail(
+                           cost: String,
+                           date: String
+                         )
 
 object JsonToCsv {
   val sparkSession = Session.startSparkSession;
@@ -19,7 +26,7 @@ object JsonToCsv {
     val props = ConfigFactory.load("application.properties");
 
     var eventJsonDf = sparkSession.read.option("multiline", "true").
-      json(props.getString(props.getString("eventDataJson")))
+      json(props.getString("eventDataJson"))
     eventJsonDf.show()
 
     //removing the cover, retrieving data and converting the outer fields into columns
@@ -33,12 +40,12 @@ object JsonToCsv {
     var scheduleDf = df.select('event_id, 'schedule)
     scheduleDf = getFlattenedScheduleDf(scheduleDf)
 
-    //TODO : merge reservedDf and scheduleDf to get a full flattened df
+    //TODO : save these dataframes
   }
 
   def getFlattenedReservedDf(reservedDf: DataFrame): DataFrame = {
-    import sparkSession.sqlContext.implicits._
-    var df = reservedDf.select('event_id)
+
+    var df = reservedDf.select('event_id,$"reserved.*")
     var confirmedDf = df.withColumn("confirmed_entries", explode($"confirmed")).
       drop('confirmed).drop('waitlist)
     confirmedDf = getFlattenedConfirmedReservations(confirmedDf)
@@ -52,13 +59,35 @@ object JsonToCsv {
       .select(confirmedDf("event_id"), 'confirmed_city, 'details,
         'total_confirmed_slots, 'waitlist_city, 'total_waitlist_slots)
       .na.drop("all", Seq("event_id"))
+
     println("reserved structured flattened .........................................")
     df.show()
     df
   }
 
-  def getFlattenedScheduleDf(frame: DataFrame): DataFrame = {
-    //TODO : write a function to flatten schedule
+  def getFlattenedScheduleDf(scheduleDf: DataFrame): DataFrame = {
+    val cols = scheduleDf.select($"schedule.*").columns
+    var df = scheduleDf.select('event_id, $"schedule.*")
+
+    //converting this to array as zip need to iterables
+    df = df.withColumn("all", array(cols.head, cols.tail: _*))
+
+    //UDF function to zip
+    def collectUdf = udf((cols: collection.mutable.WrappedArray[String],
+                          values: collection.mutable.WrappedArray[
+                            collection.mutable.WrappedArray[scheduleDetail]]
+                         ) => cols.zip(values))
+
+    df = df.withColumn("city_events_map", collectUdf(lit(cols), df("all")))
+      .withColumn("city_event_exploded", explode($"city_events_map"))
+
+    df = df.select('event_id, $"city_event_exploded._1".as("city"), $"city_event_exploded._2".as("schedules"))
+      .withColumn("schedule", explode($"schedules"))
+      .select('event_id, 'city, $"schedule.*")
+
+    println("schedule structure flattened .........................................")
+    df.show()
+    df
   }
 
   def getFlattenedConfirmedReservations(confirmedDf: DataFrame): DataFrame = {
@@ -75,17 +104,17 @@ object JsonToCsv {
       .agg(collect_list("details") as "details",
         sum(col("slots")).as("total_confirmed_slots"))
 
-    println("confiremed reservation structured flattened .........................................")
+    println("confiremed reservation structure flattened .........................................")
     df.show()
     df
   }
 
   def getFlattenedWaitlistedReservations(waitlistDf: DataFrame): DataFrame = {
-    var df = waitlistDf.select('event_id,$"waitlisted_entries.*")
-    df = df.groupBy($"event_id",$"city".as("waitlist_city"))
+    var df = waitlistDf.select('event_id, $"waitlisted_entries.*")
+    df = df.groupBy($"event_id", $"city".as("waitlist_city"))
       .agg(sum(col("slots")).as("total_waitlist_slots"))
 
-    println("waitlist reservation structured flattened .........................................")
+    println("waitlist reservation structure flattened .........................................")
     df.show()
     df
   }
