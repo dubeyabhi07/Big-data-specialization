@@ -38,9 +38,9 @@ event_data:array
 ``` 
 
 ### Output file :
-- Format  : csv
+- Format  : csv & json
 - Schema :
-  - reservation.csv :
+  - reserved.csv :
   ```json
   event_id:string
   confirmed_city:string

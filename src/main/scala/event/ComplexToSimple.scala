@@ -40,12 +40,37 @@ object JsonToCsv {
     var scheduleDf = df.select('event_id, 'schedule)
     scheduleDf = getFlattenedScheduleDf(scheduleDf)
 
-    //TODO : save these dataframes
+
+    scheduleDf.coalesce(1)
+      .write.format("csv")
+      .option("header", "true")
+      .mode("overwrite")
+      .save("output/schedule.csv")
+
+    // This method saves single JSON object in a row, without comma separation
+    reservedDf.coalesce(1)
+      .write.format("json")
+      .mode("overwrite")
+      .json("output/reserved.json")
+
+    // This method saves df as array of json objects
+    // delete the /output/reserved.text before running.
+    val reservedJSONDf = reservedDf.coalesce(1).toJSON
+    val count = reservedJSONDf.count()
+    reservedJSONDf
+      .rdd
+      .zipWithIndex()
+      .map { case (json, idx) =>
+        if (idx == 0) "[\n"+ json + "," // first row
+        else if (idx == count - 1) json + "\n]" // last row
+        else json + ","
+      }
+      .saveAsTextFile("output/reserved.txt")
   }
 
   def getFlattenedReservedDf(reservedDf: DataFrame): DataFrame = {
 
-    var df = reservedDf.select('event_id,$"reserved.*")
+    var df = reservedDf.select('event_id, $"reserved.*")
     var confirmedDf = df.withColumn("confirmed_entries", explode($"confirmed")).
       drop('confirmed).drop('waitlist)
     confirmedDf = getFlattenedConfirmedReservations(confirmedDf)
@@ -104,7 +129,7 @@ object JsonToCsv {
       .agg(collect_list("details") as "details",
         sum(col("slots")).as("total_confirmed_slots"))
 
-    println("confiremed reservation structure flattened .........................................")
+    println("confirmed reservation structure flattened .........................................")
     df.show()
     df
   }
