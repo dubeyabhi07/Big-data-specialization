@@ -1,6 +1,5 @@
 package event
 
-import climate.Utility.props
 import com.typesafe.config.ConfigFactory
 import sessioninit.Session
 import org.apache.spark.sql.functions._
