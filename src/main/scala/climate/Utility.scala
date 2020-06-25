@@ -23,7 +23,7 @@ case class NOAAData(
 object Utility {
   val props = ConfigFactory.load("application.properties");
 
-  def createStationClusterByLatLong(sparkSession: SparkSession): DataFrame = {
+  def createStationClusterByLatLong(sparkSession: SparkSession,numCluster:Int): DataFrame = {
     import sparkSession.implicits._
     val stations = sparkSession.read.textFile(props.getString("stationData"))
       .map(line => {
@@ -43,7 +43,7 @@ object Utility {
 
 
     val kMeansAlgo = new KMeans()
-      .setK(10)
+      .setK(numCluster)
       .setFeaturesCol("location")
       .setPredictionCol("cluster")
 
@@ -56,7 +56,7 @@ object Utility {
     stationsWithClusters
   }
 
-  def returnNOAAObservatoryData(sparkSession: SparkSession, fraction: Int): DataFrame = {
+  def returnNOAAObservatoryData(sparkSession: SparkSession): DataFrame = {
     val observationData = sparkSession.read.schema(Encoders.product[NOAAData].schema).
       option("dateFormat", "yyyyMMdd").csv(props.getString("climateData"))
 

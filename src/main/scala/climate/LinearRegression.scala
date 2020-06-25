@@ -17,8 +17,8 @@ object LinearRegression extends App {
 
   import sparkSession.sqlContext.implicits._
 
-  val stationClustersByLatLon = Utility.createStationClusterByLatLong(sparkSession)
-  val observedData = Utility.returnNOAAObservatoryData(sparkSession, 500)
+  val stationClustersByLatLon = Utility.createStationClusterByLatLong(sparkSession,10)
+  val observedData = Utility.returnNOAAObservatoryData(sparkSession)
 
   val rand = Random.nextInt(10)
   val randomCluster = stationClustersByLatLon.filter(col("cluster") === rand)
